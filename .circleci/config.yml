@@ -2,10 +2,28 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: alpine:3.7
+      - image: circleci/node:8.10
+
+    working_directory: ~/repo
+
     steps:
+      - checkout
       - run:
-          name: The First Step
+          name: Install Serverless CLI and dependencies
           command: |
-            echo 'Hello World!'
-            echo 'Testing CircleCI'
+            sudo npm i -g serverless
+            npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-
+        
+      # run tests!
+      - run: 
+          name: Run tests with coverage
+          command: npm test --coverage
+
+      - run:
+          name: Deploy application
+          command: sls deploy --stage pre
